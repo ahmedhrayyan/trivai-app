@@ -6,8 +6,6 @@ import random
 
 from models import setup_db, Question, Category
 
-QUESTIONS_PER_PAGE = 10
-
 
 def create_app(test_config=None):
     # create and configure the app
@@ -29,6 +27,13 @@ def create_app(test_config=None):
 
         return formated
 
+    def get_paginated_items(req, items, items_per_page=10):
+        page = req.args.get('page', 1, int)
+        start_index = (page - 1) * items_per_page
+        end_index = start_index + items_per_page
+
+        return items[start_index:end_index]
+
     @app.route('/categories')
     def get_categories():
         return jsonify({
@@ -36,18 +41,20 @@ def create_app(test_config=None):
             'categories': get_formated_categories()
         })
 
-    '''
-    @TODO: 
-    Create an endpoint to handle GET requests for questions, 
-    including pagination (every 10 questions). 
-    This endpoint should return a list of questions, 
-    number of total questions, current category, categories. 
+    @app.route('/questions')
+    def get_questions():
+        questions = Question.query.all()
+        current_questions = get_paginated_items(request, questions)
 
-    TEST: At this point, when you start the application
-    you should see questions and categories generated,
-    ten questions per page and pagination at the bottom of the screen for three pages.
-    Clicking on the page numbers should update the questions. 
-    '''
+        if len(current_questions) == 0:
+            abort(404)
+
+        return jsonify({
+            'success': True,
+            'questions': [question.format() for question in current_questions],
+            'total_questions': len(questions),
+            'categories': get_formated_categories()
+        })
 
     '''
     @TODO: 
