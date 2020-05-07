@@ -34,6 +34,14 @@ def create_app(test_config=None):
 
         return items[start_index:end_index]
 
+    def get_questions_by_category(cat_id=0):
+        if cat_id == 0:
+            # All categories
+            return Question.query.all()
+
+        return Question.query.join(
+            Category, Category.id == Question.category).filter(Category.id == cat_id).all()
+
     @app.route('/categories')
     def get_categories():
         return jsonify({
@@ -43,7 +51,12 @@ def create_app(test_config=None):
 
     @app.route('/questions')
     def get_questions():
-        questions = Question.query.all()
+        current_category = request.args.get('category', None, int)
+        if current_category is not None:
+            questions = get_questions_by_category(current_category)
+        else:
+            questions = Question.query.all()
+
         current_questions = get_paginated_items(request, questions)
 
         if len(current_questions) == 0:
@@ -53,7 +66,8 @@ def create_app(test_config=None):
             'success': True,
             'questions': [question.format() for question in current_questions],
             'total_questions': len(questions),
-            'categories': get_formated_categories()
+            'categories': get_formated_categories(),
+            'current_category': current_category
         })
 
     @app.route('/questions/<question_id>', methods=['DELETE'])
@@ -100,15 +114,7 @@ def create_app(test_config=None):
         except:
             abort(400)
 
-    '''
-    @TODO: 
-    Create a GET endpoint to get questions based on category. 
-
-    TEST: In the "List" tab / main screen, clicking on one of the 
-    categories in the left column will cause only questions of that 
-    category to be shown. 
-    '''
-    '''
+    '''         
     @TODO: 
     Create a POST endpoint to get questions to play the quiz. 
     This endpoint should take category and previous question parameters 
