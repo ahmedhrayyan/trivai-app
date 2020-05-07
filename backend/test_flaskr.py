@@ -60,7 +60,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'not found')
 
-    def test_remove_questions(self):
+    def test_remove_question(self):
         total_questions_before = len(Question.query.all())
         res = self.client().delete('/questions/2')
         data = json.loads(res.data)
@@ -70,7 +70,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['success'])
         self.assertEqual(total_questions_before - 1, total_questions_after)
 
-    def test_404_remove_questions(self):
+    def test_404_remove_question(self):
         res = self.client().delete('/questions/2832')
         data = json.loads(res.data)
 
