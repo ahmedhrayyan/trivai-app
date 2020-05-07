@@ -60,6 +60,23 @@ class TriviaTestCase(unittest.TestCase):
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'not found')
 
+    def test_remove_questions(self):
+        total_questions_before = len(Question.query.all())
+        res = self.client().delete('/questions/2')
+        data = json.loads(res.data)
+        total_questions_after = len(Question.query.all())
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(total_questions_before - 1, total_questions_after)
+
+    def test_404_remove_questions(self):
+        res = self.client().delete('/questions/2832')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertFalse(data['success'])
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
