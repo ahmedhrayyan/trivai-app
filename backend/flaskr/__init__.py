@@ -74,6 +74,17 @@ def create_app(test_config=None):
     @app.route('/questions', methods=['POST'])
     def handle_post_questions():
         data = request.get_json()
+        search_term = data.get('search_term', None)
+        if search_term is not None:
+            search_term = '%{}%'.format(search_term)
+            current_questions = Question.query.filter(
+                Question.question.ilike(search_term)).all()
+
+            return {
+                'success': True,
+                'questions': [question.format() for question in current_questions]
+            }
+
         try:
             new_question = Question(
                 data['question'],
@@ -88,17 +99,6 @@ def create_app(test_config=None):
             })
         except:
             abort(400)
-
-    '''
-    @TODO: 
-    Create a POST endpoint to get questions based on a search term. 
-    It should return any questions for whom the search term 
-    is a substring of the question. 
-
-    TEST: Search by any phrase. The questions list will update to include 
-    only question that include that string within their question. 
-    Try using the word "title" to start. 
-    '''
 
     '''
     @TODO: 
