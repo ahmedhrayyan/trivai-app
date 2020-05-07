@@ -33,10 +33,11 @@ class TriviaTestCase(unittest.TestCase):
     def test_get_categories(self):
         res = self.client().get('/categories')
         data = json.loads(res.data)
+        first_category = Category.query.first()
 
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['success'])
-        self.assertTrue(data['categories']['1'])
+        self.assertEqual(data['categories']['1'], first_category.type)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
