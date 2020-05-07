@@ -106,6 +106,20 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['questions'], [question.format()
                                              for question in current_questions])
 
+    def test_get_question_by_cat(self):
+        questions = Question.query.all()
+        category_3_questions = 0
+        for question in questions:
+            if question.category == 3:
+                category_3_questions += 1
+        res = self.client().get('/questions?category=3')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(data['total_questions'], category_3_questions)
+        self.assertEqual(data['current_category'], 3)
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
