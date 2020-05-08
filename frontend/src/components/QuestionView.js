@@ -126,17 +126,26 @@ class QuestionView extends Component {
   }
 
   render() {
+    const headingStyle = this.state.currentCategory
+      ? {fontWeight: 'normal'}
+      : {fontWeight: 'bold'}
+
     return (
       <div className="question-view">
         <div className="categories-list">
-          <h2 onClick={() => {this.getQuestions()}}>Categories</h2>
+          <h2 style={headingStyle} onClick={() => {this.getQuestions()}}>Categories</h2>
           <ul>
-            {Object.keys(this.state.categories).map((id, ) => (
-              <li key={id} onClick={() => {this.getByCategory(id)}}>
-                {this.state.categories[id]}
-                <img className="category" src={`${this.state.categories[id]}.svg`}/>
-              </li>
-            ))}
+            {Object.keys(this.state.categories).map((id, ) => { 
+              const style = this.state.currentCategory === parseInt(id)
+                ? {fontWeight: 'bold'}
+                : null
+              return (
+                <li key={id} style={style} onClick={() => {this.getByCategory(id)}}>
+                  {this.state.categories[id]}
+                  <img className="category" src={`${this.state.categories[id]}.svg`}/>
+                </li>
+              )
+            })}
           </ul>
           <Search submitSearch={this.submitSearch}/>
         </div>
