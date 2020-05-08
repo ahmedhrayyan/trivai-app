@@ -111,10 +111,25 @@ class QuestionView extends Component {
     if(action === 'DELETE') {
       if(window.confirm('are you sure you want to delete the question?')) {
         $.ajax({
-          url: `/questions/${id}`, //TODO: update request URL
+          url: `/questions/${id}`,
           type: "DELETE",
           success: (result) => {
-            this.getQuestions();
+            this.setState(prevState => {
+              // check if the removed item was the last item on the page
+              const page = this.state.totalQuestions - ((this.state.page - 1) * 10) === 1
+                ? prevState.page - 1
+                : prevState.page
+              return {
+                totalQuestions: prevState.totalQuestions - 1,
+                page
+              }
+            }, () => {
+              if (this.state.currentCategory) {
+                this.getByCategory(this.state.currentCategory, this.state.page)
+              } else {
+                this.getQuestions()
+              }
+            })
           },
           error: (error) => {
             alert('Unable to load questions. Please try your request again')
