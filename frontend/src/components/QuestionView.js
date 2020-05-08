@@ -41,7 +41,13 @@ class QuestionView extends Component {
   }
 
   selectPage(num) {
-    this.setState({page: num}, () => this.getQuestions());
+    this.setState({page: num}, () => {
+      if (this.state.currentCategory) {
+        this.getByCategory(this.state.currentCategory, this.state.page)
+      } else {
+        this.getQuestions()
+      }
+    });
   }
 
   createPagination(){
