@@ -39,8 +39,8 @@ def create_app(test_config=None):
             # All categories
             return Question.query.all()
 
-        return Question.query.join(
-            Category, Category.id == Question.category).filter(Category.id == cat_id).all()
+        return Question.query.join(Category, Category.id == Question.category
+                                   ).filter(Category.id == cat_id).all()
 
     @app.route('/categories')
     def get_categories():
@@ -81,7 +81,7 @@ def create_app(test_config=None):
             question.delete()
             return jsonify({
                 'success': True,
-                'deleted_id': question_id  
+                'deleted_id': question_id
             })
         except:
             abort(422)
@@ -97,7 +97,8 @@ def create_app(test_config=None):
 
             return {
                 'success': True,
-                'questions': [question.format() for question in current_questions]
+                'questions':
+                    [question.format() for question in current_questions]
             }
 
         try:
