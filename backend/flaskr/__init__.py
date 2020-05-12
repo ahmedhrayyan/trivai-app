@@ -34,14 +34,6 @@ def create_app(test_config=None):
 
         return items[start_index:end_index]
 
-    def get_questions_by_category(cat_id=0):
-        if cat_id == 0:
-            # All categories
-            return Question.query.all()
-
-        return Question.query.join(Category, Category.id == Question.category
-                                   ).filter(Category.id == cat_id).all()
-
     @app.route('/categories')
     def get_categories():
         return jsonify({
@@ -53,7 +45,8 @@ def create_app(test_config=None):
     def get_questions():
         current_category = request.args.get('category', None, int)
         if current_category is not None:
-            questions = get_questions_by_category(current_category)
+            questions = Question.query.join(Category, Category.id == Question.category
+                                   ).filter(Category.id == current_category).all()
         else:
             questions = Question.query.all()
 
@@ -106,7 +99,7 @@ def create_app(test_config=None):
     def post_questions():
         data = request.get_json()
         if ('question' not in data or 'answer' not in data
-        or 'category' not in data or 'difficulty' not in data):
+                or 'category' not in data or 'difficulty' not in data):
             abort(400)
         new_question = Question(
             data['question'],
@@ -128,16 +121,22 @@ def create_app(test_config=None):
     @app.route('/quizzes', methods=['POST'])
     def play_quiz():
         data = request.get_json()
+        if 'category' not in data or 'previous_questions' not in data:
+            abort(400)
+            
         quiz_category = data.get('category')
         previous_questions = data.get('previous_questions')
-        questions = get_questions_by_category(quiz_category)
-        filtered_questions = []
-        for question in questions:
-            if question.id not in previous_questions:
-                filtered_questions.append(question)
+
+        if quiz_category == 0:
+            # all categories
+            questions = Question.query.join(Category, Category.id == Question.category
+                ).filter(Question.id.notin_(previous_questions)).all()
+        else:
+            questions = Question.query.join(Category, Category.id == Question.category
+                ).filter(Category.id == quiz_category, Question.id.notin_(previous_questions)).all()
 
         try:
-            question = random.choice(filtered_questions).format()
+            question = random.choice(questions).format()
         except:
             question = None
 
