@@ -70,6 +70,7 @@ Endpoints
 * GET '/categories'
 * GET '/questions'
 * DELETE '/questions/question_id'
+* POST '/search'
 * POST '/questions'
 * POST '/quizzes'
 
@@ -107,16 +108,20 @@ Endpoints
     'deleted_id': <number>
   }
 
-### POST '/questions'
-- Post a new question to the database **OR** Post a search term
+### POST '/search'
+- Post search_term key to search throw questions
 - Request Arguments: None
-- Returns
-  - if the post data have a search_term key the response would be a dictionary with a single key, questions, that contains a list of questions based on the search term
-    ```
-    {
-      'questions': [list of questions]
-    }
-  - if the post data have a question, answer, category and difficulty keys, the request would insert a new question to the database and the response would be the created_id
+- Returns a dictionary with a single key, questions which contains a list of questions based on search_term
+  ```
+  {
+    'questions': [list of questions]
+  }
+  ```
+
+### POST '/questions'
+- Post a new question to the database
+- Request Arguments: None
+- If post data have a question, answer, category and difficulty keys, the request would insert a new question to the database and the response would be the created_id
     ```
     {
       'created_id': <number>
