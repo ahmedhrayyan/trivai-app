@@ -95,11 +95,11 @@ def create_app(test_config=None):
             current_questions = Question.query.filter(
                 Question.question.ilike(search_term)).all()
 
-            return {
+            return jsonify({
                 'success': True,
                 'questions':
                     [question.format() for question in current_questions]
-            }
+            })
 
         try:
             new_question = Question(
