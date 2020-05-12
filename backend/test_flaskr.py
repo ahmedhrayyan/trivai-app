@@ -52,7 +52,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['questions'][0], first_quiestion)
         self.assertEqual(data['total_questions'], total_quiestions)
 
-    def test_404_get_questions(self):
+    def test_404_get_questions_invalid_page(self):
         res = self.client().get('/questions?page=1000')
         data = json.loads(res.data)
 
@@ -70,7 +70,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['success'])
         self.assertEqual(total_questions_before - 1, total_questions_after)
 
-    def test_404_remove_question(self):
+    def test_404_remove_question_invalid_id(self):
         res = self.client().delete('/questions/2832')
         data = json.loads(res.data)
 
@@ -94,6 +94,21 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['success'])
         self.assertEqual(total_questions_before + 1, total_questions_after)
 
+    def test_400_create_question_invalid_data(self):
+        # data have no category key
+        data = json.dumps({
+            'question': 'this is a question',
+            'answer': 'this is an answer',
+            'difficulty': 1
+        })
+        res = self.client(
+        ).post('/questions', data=data, content_type='application/json')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(data['success'])
+        
+
     def test_search_questions(self):
         data = json.dumps({
             'search_term': 'title'
@@ -105,6 +120,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['success'])
         self.assertTrue(len(data['questions']) > -1)
+
+    def test_400_search_questions_invalid_data(self):
+        res = self.client().post(
+            '/search', data=json.dumps({}), content_type='application/json')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(data['success'])
+
 
     def test_get_question_by_cat(self):
         questions = Question.query.all()
@@ -133,6 +157,17 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['success'])
         self.assertNotEqual(data['question']['id'], 13)
         self.assertNotEqual(data['question']['id'], 14)
+
+    def test_400_play_quiz_invalid_data(self):
+        data = {
+            'category': 3
+        }
+        res = self.client().post('/quizzes', data=json.dumps(data),
+                                 content_type='application/json')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(data['success'])
 
 
 # Make the tests conveniently executable
