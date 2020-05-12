@@ -86,28 +86,36 @@ def create_app(test_config=None):
         except:
             abort(422)
 
-    @app.route('/questions', methods=['POST'])
-    def handle_post_questions():
-        data = request.get_json()
-        search_term = data.get('search_term', None)
-        if search_term is not None:
-            search_term = '%{}%'.format(search_term)
-            current_questions = Question.query.filter(
-                Question.question.ilike(search_term)).all()
+    @app.route('/search', methods=['POST'])
+    def search():
+        search_term = request.get_json().get('search_term', None)
+        if search_term is None:
+            abort(400)
 
-            return jsonify({
-                'success': True,
-                'questions':
-                    [question.format() for question in current_questions]
-            })
+        search_term = '%{}%'.format(search_term)
+        current_questions = Question.query.filter(
+            Question.question.ilike(search_term)).all()
+
+        return jsonify({
+            'success': True,
+            'questions':
+                [question.format() for question in current_questions]
+        })
+
+    @app.route('/questions', methods=['POST'])
+    def post_questions():
+        data = request.get_json()
+        if ('question' not in data or 'answer' not in data
+        or 'category' not in data or 'difficulty' not in data):
+            abort(400)
+        new_question = Question(
+            data['question'],
+            data['answer'],
+            data['category'],
+            data['difficulty']
+        )
 
         try:
-            new_question = Question(
-                data['question'],
-                data['answer'],
-                data['category'],
-                data['difficulty']
-            )
             new_question.insert()
 
             return jsonify({
